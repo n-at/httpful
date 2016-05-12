@@ -35,7 +35,7 @@ class Response
         $this->raw_body     = $body;
 
         $this->code         = $this->_parseCode($headers);
-        $this->headers      = $this->_parseHeaders($headers);
+        $this->headers      = Response\Headers::fromString($headers);
 
         $this->_interpretHeaders();
 
@@ -133,7 +133,9 @@ class Response
 
     public function _parseCode($headers)
     {
-        $parts = explode(' ', substr($headers, 0, strpos($headers, "\n")));
+        $end = strpos($headers, "\r\n");
+        if ($end === false) $end = strlen($headers);
+        $parts = explode(' ', substr($headers, 0, $end));
         if (count($parts) < 2 || !is_numeric($parts[1])) {
             throw new \Exception("Unable to parse response code from HTTP response due to malformed response");
         }
